@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Version: 0.1
+# Version: 0.2
 # This script encode the video using the x265/x264 encoder and merge the
 # encoded video with subtitles into a mkv file
 
@@ -118,7 +118,8 @@ def interactive(rst_dict):
                            % rst_dict['vpreset'])
 
     if 'vcrf' not in rst_dict or rst_dict['vcrf'] is None:
-        log_tools.log_info('Input the \033[01;33mCRF\033[0m value [default = 23]')
+        log_tools.log_info('Input the \033[01;33mCRF\033[0m value \
+[default = 23]')
         ch = raw_input('input:')
         try:
             select = int(ch)
@@ -129,7 +130,8 @@ def interactive(rst_dict):
                            % rst_dict['vcrf'])
 
     if 'vzoom' not in rst_dict or rst_dict['vzoom'] is None:
-        log_tools.log_info('Input the \033[01;33mzoom\033[0m value [default = 1.0]')
+        log_tools.log_info('Input the \033[01;33mzoom\033[0m value \
+[default = 1.0]')
         ch = raw_input('input:')
         try:
             select = float(ch)
@@ -140,7 +142,8 @@ def interactive(rst_dict):
         log_tools.log_info('Use video zoom \033[01;31m%f\033[0m'
                            % rst_dict['vzoom'])
 
-    if 'vunit' not in rst_dict or rst_dict['vunit'] is None and rst_dict['vzoom'] != 1:
+    if ('vunit' not in rst_dict or rst_dict['vunit'] is None)\
+            and rst_dict['vzoom'] != 1:
         log_tools.log_info('Select the basic block \033[01;33munit\033[0m for resize:\n\
 \033[01;32m1.16x16\033[0m\n1.32x32')
         ch = raw_input('input:')
@@ -163,8 +166,8 @@ def interactive(rst_dict):
 
     if 'aencoder' not in rst_dict or rst_dict['aencoder'] is None:
         rst_dict['aencoder'] = 'libfdk_aac'
-        log_tools.log_info('Use default \033[01;33maudio encoder\033[0m \033[01;31m%s\033[0m'
-                           % rst_dict['aencoder'])
+        log_tools.log_info('Use default \033[01;33maudio encoder\033[0m \
+\033[01;31m%s\033[0m' % rst_dict['aencoder'])
 
     if 'abr' not in rst_dict or rst_dict['abr'] is None:
         log_tools.log_info('Select the \033[01;33maudio bit rate\033[0m:\n\
@@ -382,15 +385,19 @@ def main(argv):
             is_interactive = True
         elif opt == '--s1':
             s1_file = arg
+            s1_file = s1_file.replace('&', '\&')
             has_subtitle = True
         elif opt == '--s2':
             s2_file = arg
+            s2_file = s2_file.replace('&', '\&')
             has_subtitle = True
         elif opt == '--s3':
             s3_file = arg
+            s3_file = s3_file.replace('&', '\&')
             has_subtitle = True
         elif opt == '--s4':
             s4_file = arg
+            s4_file = s4_file.replace('&', '\&')
             has_subtitle = True
 
     if in_video is None or out_video is None:
@@ -470,18 +477,30 @@ def main(argv):
     if s1_file is not None:
         sub_list.append(s1_file)
         lang_list.append(lang1)
+        # Try to convert the subtitle to UTF8
+        enca_cmd = 'enca -L zh_CN -x UTF-8 %s' % s1_file
+        os.system(enca_cmd)
 
     if s2_file is not None:
         sub_list.append(s2_file)
         lang_list.append(lang2)
+        # Try to convert the subtitle to UTF8
+        enca_cmd = 'enca -L zh_CN -x UTF-8 %s' % s2_file
+        os.system(enca_cmd)
 
     if s3_file is not None:
         sub_list.append(s3_file)
         lang_list.append(lang3)
+        # Try to convert the subtitle to UTF8
+        enca_cmd = 'enca -L zh_CN -x UTF-8 %s' % s3_file
+        os.system(enca_cmd)
 
     if s4_file is not None:
         sub_list.append(s4_file)
         lang_list.append(lang4)
+        # Try to convert the subtitle to UTF8
+        enca_cmd = 'enca -L zh_CN -x UTF-8 %s' % s4_file
+        os.system(enca_cmd)
 
     # Generate the merge cmd line
     mkv_cmd_list = 'mkvmerge -o %s --default-track 0' % out_video
@@ -492,8 +511,6 @@ def main(argv):
                                                                 sub)
 
     mkv_cmd_list = mkv_cmd_list + ' ' + step1_file
-    # Replace the & to \& in the cmd line
-    mkv_cmd_list = mkv_cmd_list.replace('&', '\&')
     os.system(mkv_cmd_list)
     # Check the output video, and del the tmp file
     if os.path.isfile(out_video):
