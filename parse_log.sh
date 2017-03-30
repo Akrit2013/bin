@@ -1,0 +1,1 @@
+/home/nile/project/caffe-dev-160608/tools/extra/parse_log.sh
