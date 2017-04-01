@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Version: 0.2
+# Version: 0.3
 # This script encode the video using the x265/x264 encoder and merge the
 # encoded video with subtitles into a mkv file
 
@@ -13,6 +13,16 @@ import time_tools
 import ConfigParser
 import video_tools
 import common_tools
+
+
+def preprocess_str(in_str):
+    """
+    This function preprocess the input file name
+    and \ in front of the space and &
+    """
+    in_str = in_str.replace('&', '\&')
+    in_str = in_str.replace(' ', '\ ')
+    return in_str
 
 
 def fit_resolution(length, unit):
@@ -165,8 +175,23 @@ def interactive(rst_dict):
         rst_dict['vunit'] = 16
 
     if 'aencoder' not in rst_dict or rst_dict['aencoder'] is None:
-        rst_dict['aencoder'] = 'libfdk_aac'
-        log_tools.log_info('Use default \033[01;33maudio encoder\033[0m \
+        log_tools.log_info('Select the \033[01;33mAudio encoder\033[0m:\n\
+0.copy\n\033[01;32m1.libfdk_aac\033[0m')
+        ch = raw_input('input:')
+        try:
+            select = int(ch)
+        except:
+            select = -1
+        if select == 0:
+            rst_dict['aencoder'] = 'copy'
+            # Set the abr for compitable
+            rst_dict['abr'] = '384k'
+        elif select == 1:
+            rst_dict['aencoder'] = 'libfdk_aac'
+        else:
+            rst_dict['aencoder'] = 'libfdk_aac'
+
+        log_tools.log_info('Use Audio encoder \
 \033[01;31m%s\033[0m' % rst_dict['aencoder'])
 
     if 'abr' not in rst_dict or rst_dict['abr'] is None:
@@ -376,28 +401,24 @@ def main(argv):
             print help_msg
             sys.exit()
         elif opt == '-i':
-            in_video = arg
+            in_video = preprocess_str(arg)
         elif opt == '-o':
-            out_video = arg
+            out_video = preprocess_str(arg)
         elif opt == '-c':
-            config_file = arg
+            config_file = preprocess_str(arg)
         elif opt == '-a':
             is_interactive = True
         elif opt == '--s1':
-            s1_file = arg
-            s1_file = s1_file.replace('&', '\&')
+            s1_file = preprocess_str(arg)
             has_subtitle = True
         elif opt == '--s2':
-            s2_file = arg
-            s2_file = s2_file.replace('&', '\&')
+            s2_file = preprocess_str(arg)
             has_subtitle = True
         elif opt == '--s3':
-            s3_file = arg
-            s3_file = s3_file.replace('&', '\&')
+            s3_file = preprocess_str(arg)
             has_subtitle = True
         elif opt == '--s4':
-            s4_file = arg
-            s4_file = s4_file.replace('&', '\&')
+            s4_file = preprocess_str(arg)
             has_subtitle = True
 
     if in_video is None or out_video is None:
