@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Version: 0.31
+# Version: 0.41
 # This script encode the video using the x265/x264 encoder and merge the
 # encoded video with subtitles into a mkv file
 
@@ -220,15 +220,21 @@ def interactive(rst_dict):
 
 
 def get_language(subtitle):
+    track_name = None
     if subtitle is not None:
         # Guess the language
         lang = subtitle_tools.guess_language(subtitle)
+        track_name = subtitle_tools.guess_track_name(subtitle)
         if lang is None:
             lang = subtitle_tools.detect_language(subtitle)
 
         if lang is not None:
             log_tools.log_info('Lanauge of %s is \033[01;32m%s\033[0m'
                                % (subtitle, lang))
+        if track_name is not None:
+            log_tools.log_info('Track name of %s is \033[01;32m%s\033[0m'
+                               % (subtitle, track_name))
+
         else:
             # und indicate undetermined language in mkvmerge
             lang = 'und'
@@ -237,7 +243,7 @@ def get_language(subtitle):
 
     else:
         lang = None
-    return lang
+    return (lang, track_name)
 
 
 def default_setting(rst_dict):
@@ -477,6 +483,9 @@ def main(argv):
 
     # Begin to encode
     log_tools.log_info('Start to encode the video %s' % in_video)
+    # Display the cmd line
+    log_tools.log_info('\033[0;33m%s\033[0m' % cmd_str_ffmpeg)
+    # Start encode
     os.system(cmd_str_ffmpeg)
     log_tools.log_info('Encoding finished.')
 
@@ -487,17 +496,19 @@ def main(argv):
 
     log_tools.log_info('Merge subtitles into MKV file')
     log_tools.log_info('Guessing the language of the subtitle')
-    lang1 = get_language(s1_file)
-    lang2 = get_language(s2_file)
-    lang3 = get_language(s3_file)
-    lang4 = get_language(s4_file)
+    lang1, track_name1 = get_language(s1_file)
+    lang2, track_name2 = get_language(s2_file)
+    lang3, track_name3 = get_language(s3_file)
+    lang4, track_name4 = get_language(s4_file)
 
     # Generate the subtitle list
     sub_list = []
     lang_list = []
+    track_name_list = []
     if s1_file is not None:
         sub_list.append(s1_file)
         lang_list.append(lang1)
+        track_name_list.append(track_name1)
         # Try to convert the subtitle to UTF8
         enca_cmd = 'enca -L zh_CN -x UTF-8 %s' % s1_file
         os.system(enca_cmd)
@@ -505,6 +516,7 @@ def main(argv):
     if s2_file is not None:
         sub_list.append(s2_file)
         lang_list.append(lang2)
+        track_name_list.append(track_name2)
         # Try to convert the subtitle to UTF8
         enca_cmd = 'enca -L zh_CN -x UTF-8 %s' % s2_file
         os.system(enca_cmd)
@@ -512,6 +524,7 @@ def main(argv):
     if s3_file is not None:
         sub_list.append(s3_file)
         lang_list.append(lang3)
+        track_name_list.append(track_name3)
         # Try to convert the subtitle to UTF8
         enca_cmd = 'enca -L zh_CN -x UTF-8 %s' % s3_file
         os.system(enca_cmd)
@@ -519,6 +532,7 @@ def main(argv):
     if s4_file is not None:
         sub_list.append(s4_file)
         lang_list.append(lang4)
+        track_name_list.append(track_name4)
         # Try to convert the subtitle to UTF8
         enca_cmd = 'enca -L zh_CN -x UTF-8 %s' % s4_file
         os.system(enca_cmd)
@@ -526,12 +540,18 @@ def main(argv):
     # Generate the merge cmd line
     mkv_cmd_list = 'mkvmerge -o %s --default-track 0' % out_video
     id_counter = 0
-    for sub, lang in zip(sub_list, lang_list):
-        mkv_cmd_list = mkv_cmd_list + ' --language %d:%s %s' % (id_counter,
-                                                                lang,
-                                                                sub)
+    for sub, lang, track_name in zip(sub_list, lang_list, track_name_list):
+        mkv_cmd_list = mkv_cmd_list + ' --language %d:%s' % (id_counter,
+                                                             lang)
+        if track_name is not None:
+            mkv_cmd_list = mkv_cmd_list + ' --track-name %d:%s' % (id_counter,
+                                                                   track_name)
+        mkv_cmd_list = mkv_cmd_list + ' %s' % sub
+#        id_counter += 1
 
     mkv_cmd_list = mkv_cmd_list + ' ' + step1_file
+    # Print the mkvmerge cmd
+    log_tools.log_info('\033[0;33m%s\033[0m' % mkv_cmd_list)
     os.system(mkv_cmd_list)
     # Check the output video, and del the tmp file
     if os.path.isfile(out_video):
