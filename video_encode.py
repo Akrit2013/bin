@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Version: 0.3
+# Version: 0.31
 # This script encode the video using the x265/x264 encoder and merge the
 # encoded video with subtitles into a mkv file
 
@@ -95,7 +95,7 @@ def interactive(rst_dict):
         rst_dict['vpreset'] = 'veryslow'
         log_tools.log_info('Select the video \033[01;33mencoding preset\033[0m:\
 \n1.ultrafast\n2.superfast\n\
-3.veryfast\n4.faster\n\033[01;32m5.medium\033[0m\n6.slow\n7.slower\n\
+3.veryfast\n4.faster\n5.medium\n\033[01;32m6.slow\033[0m\n7.slower\n\
 8.veryslow\n9.placebo')
         ch = raw_input('input:')
         try:
@@ -122,7 +122,7 @@ def interactive(rst_dict):
         elif select == 9:
             rst_dict['vpreset'] = 'placebo'
         else:
-            rst_dict['vpreset'] = 'medium'
+            rst_dict['vpreset'] = 'slow'
 
         log_tools.log_info('Use video preset \033[01;31m%s\033[0m'
                            % rst_dict['vpreset'])
@@ -196,7 +196,7 @@ def interactive(rst_dict):
 
     if 'abr' not in rst_dict or rst_dict['abr'] is None:
         log_tools.log_info('Select the \033[01;33maudio bit rate\033[0m:\n\
-1.384k\n2.192k\n\033[01;32m3.128k\033[0m\n4.64k')
+\033[01;32m1.384k\033[0m\n2.192k\n3.128k\n4.64k')
         ch = raw_input('input:')
         try:
             select = int(ch)
@@ -212,7 +212,7 @@ def interactive(rst_dict):
         elif select == 4:
             rst_dict['abr'] = '64k'
         else:
-            rst_dict['abr'] = '128k'
+            rst_dict['abr'] = '384k'
 
         log_tools.log_info('Use audio bitrate \033[01;31m%s\033[0m'
                            % rst_dict['abr'])
