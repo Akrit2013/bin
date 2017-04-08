@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Version: 0.41
+# Version: 0.5
 # This script encode the video using the x265/x264 encoder and merge the
 # encoded video with subtitles into a mkv file
 
@@ -22,6 +22,8 @@ def preprocess_str(in_str):
     """
     in_str = in_str.replace('&', '\&')
     in_str = in_str.replace(' ', '\ ')
+    in_str = in_str.replace('(', '\(')
+    in_str = in_str.replace(')', '\)')
     return in_str
 
 
