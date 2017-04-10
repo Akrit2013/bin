@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Version: 0.5
+# Version: 0.51
 # This script encode the video using the x265/x264 encoder and merge the
 # encoded video with subtitles into a mkv file
 
@@ -258,7 +258,7 @@ def default_setting(rst_dict):
                            % rst_dict['vencoder'])
 
     if 'vpreset' not in rst_dict or rst_dict['vpreset'] is None:
-        rst_dict['vpreset'] = 'veryslow'
+        rst_dict['vpreset'] = 'slow'
         log_tools.log_info('Use default video preset \033[01;31m%s\033[0m'
                            % rst_dict['vpreset'])
 
