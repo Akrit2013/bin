@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Version: 0.51
+# Version: 0.6
 # This script encode the video using the x265/x264 encoder and merge the
 # encoded video with subtitles into a mkv file
 
@@ -233,14 +233,17 @@ def get_language(subtitle):
         if lang is not None:
             log_tools.log_info('Lanauge of %s is \033[01;32m%s\033[0m'
                                % (subtitle, lang))
-        if track_name is not None:
-            log_tools.log_info('Track name of %s is \033[01;32m%s\033[0m'
-                               % (subtitle, track_name))
-
         else:
             # und indicate undetermined language in mkvmerge
             lang = 'und'
             log_tools.log_warn('Can not determine the language of %s'
+                               % subtitle)
+
+        if track_name is not None:
+            log_tools.log_info('Track name of %s is \033[01;32m%s\033[0m'
+                               % (subtitle, track_name))
+        else:
+            log_tools.log_warn('Can not determine the track name of %s'
                                % subtitle)
 
     else:
