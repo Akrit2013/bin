@@ -1,1 +1,1 @@
-/home/nile/project/caffe-dev-160608/tools/extra/summarize.py
+/home/nile/project/caffe/tools/extra/summarize.py
