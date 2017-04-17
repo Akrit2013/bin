@@ -388,6 +388,8 @@ def main(argv):
     has_subtitle = False
     is_interactive = False
 
+    track_num = None
+
     help_msg = 'video_encode -i <video> -o <video.mkv> -c [config] \
 --s1 [subtitle]\n\
 -i <video>      The input video to be encoded\n\
@@ -444,6 +446,11 @@ def main(argv):
     else:
         step1_file = out_video
 
+    # Display the video basic info
+    info = video_tools.get_video_info(in_video)
+    track_num = len(info['streams'])
+    video_tools.print_video_basic_info(in_video)
+
     # Load the config file
     if config_file is None:
         log_tools.log_info('Config file is not set, use the default setting')
@@ -476,16 +483,22 @@ def main(argv):
 
         # the commond line for the ffmpeg with resize video
         cmd_str_ffmpeg = 'ffmpeg -i %s -c:v %s -preset %s -crf %d -c:a %s \
-    -b:a %s -s %dx%d %s' % (in_video, param_dict['vencoder'],
-                            param_dict['vpreset'], param_dict['vcrf'],
-                            param_dict['aencoder'], param_dict['abr'],
-                            zoom_width, zoom_height, step1_file)
+-b:a %s -s %dx%d' % (in_video, param_dict['vencoder'],
+                     param_dict['vpreset'], param_dict['vcrf'],
+                     param_dict['aencoder'], param_dict['abr'],
+                     zoom_width, zoom_height)
     else:
         # the commond line for the ffmpeg without resize video
         cmd_str_ffmpeg = 'ffmpeg -i %s -c:v %s -preset %s -crf %d -c:a %s \
-    -b:a %s %s' % (in_video, param_dict['vencoder'], param_dict['vpreset'],
-                   param_dict['vcrf'], param_dict['aencoder'],
-                   param_dict['abr'], step1_file)
+-b:a %s' % (in_video, param_dict['vencoder'], param_dict['vpreset'],
+            param_dict['vcrf'], param_dict['aencoder'],
+            param_dict['abr'])
+
+    # Add map command to make sure all tracks are converted
+    for aid in range(0, track_num):
+        cmd_str_ffmpeg = cmd_str_ffmpeg + ' -map 0:%d' % aid
+    # Add the output
+    cmd_str_ffmpeg = cmd_str_ffmpeg + ' ' + step1_file
 
     # Begin to encode
     log_tools.log_info('Start to encode the video %s' % in_video)
