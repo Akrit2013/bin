@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Version: 0.61
+# Version: 0.7
 # This script encode the video using the x265/x264 encoder and merge the
 # encoded video with subtitles into a mkv file
 
@@ -77,14 +77,16 @@ def interactive(rst_dict):
     """
     if 'vencoder' not in rst_dict or rst_dict['vencoder'] is None:
         log_tools.log_info('Select the \033[01;33mvideo encoder\033[0m:\
-\n1.\033[01;32mlibx265\033[0m\n2.libx264')
+\n0.copy\n1.\033[01;32mlibx265\033[0m\n2.libx264')
         ch = raw_input('input:')
         try:
             select = int(ch)
         except:
             select = -1
 
-        if select == 1:
+        if select == 0:
+            rst_dict['vencoder'] = 'copy'
+        elif select == 1:
             rst_dict['vencoder'] = 'libx265'
         elif select == 2:
             rst_dict['vencoder'] = 'libx264'
@@ -388,8 +390,6 @@ def main(argv):
     has_subtitle = False
     is_interactive = False
 
-    track_num = None
-
     help_msg = 'video_encode -i <video> -o <video.mkv> -c [config] \
 --s1 [subtitle]\n\
 -i <video>      The input video to be encoded\n\
@@ -447,8 +447,6 @@ def main(argv):
         step1_file = out_video
 
     # Display the video basic info
-    info = video_tools.get_video_info(in_video)
-    track_num = len(info['streams'])
     video_tools.print_video_basic_info(in_video)
 
     # Load the config file
@@ -495,8 +493,7 @@ def main(argv):
             param_dict['abr'])
 
     # Add map command to make sure all tracks are converted
-    for aid in range(0, track_num):
-        cmd_str_ffmpeg = cmd_str_ffmpeg + ' -map 0:%d' % aid
+    cmd_str_ffmpeg = cmd_str_ffmpeg + ' -map 0'
     # Add the output
     cmd_str_ffmpeg = cmd_str_ffmpeg + ' ' + step1_file
 
