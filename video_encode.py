@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Version: 0.7
+# Version: 0.7.1
 # This script encode the video using the x265/x264 encoder and merge the
 # encoded video with subtitles into a mkv file
 
@@ -492,6 +492,13 @@ def main(argv):
             param_dict['vcrf'], param_dict['aencoder'],
             param_dict['abr'])
 
+    # Search larger range to void the missing subtitles (optional)
+    cmd_str_ffmpeg = cmd_str_ffmpeg + ' -analyzeduration 1000000k \
+-probesize 1000000k'
+    # Ignore unknow stream type and print progress report
+    cmd_str_ffmpeg = cmd_str_ffmpeg + ' -ignore_unknown -stats'
+    # Copy the subtitles
+    cmd_str_ffmpeg = cmd_str_ffmpeg + ' -c:s copy'
     # Add map command to make sure all tracks are converted
     cmd_str_ffmpeg = cmd_str_ffmpeg + ' -map 0'
     # Add the output
