@@ -5,6 +5,7 @@
 # and the user can kill one of them according to the index
 # Usage:
 #   kill.py process_name
+# Version 1.1
 
 import os
 import sys
@@ -56,6 +57,8 @@ def main(argv):
     DEF_TIME_THD2 = 600
     # Define the max length of the cmdline
     DEF_CMDLINE_LEN = 100
+    # Define the max length of name
+    DEF_NAME_LEN = 50
 
     if len(argv) == 0:
         print 'Usage: kill.py thread_keyword1 [thread_keyword2]'
@@ -113,6 +116,9 @@ def main(argv):
             ID = color.set_color(ID, 'yellow')
 
         name = p.name()
+        # Restrict the length of name section
+        if len(name) > DEF_NAME_LEN:
+            name = name[:DEF_NAME_LEN]
         # If the name include the keyword, highlight the name
         if match_keywords(name.split(), keyword_list):
             name = color.set_color(name, 'green')
@@ -122,6 +128,7 @@ def main(argv):
             cmdline = 'N/A'
         else:
             cmdline = list2str(cmdline_list)
+
         # Makesure the cmdline is not too long
         if len(cmdline) > DEF_CMDLINE_LEN:
             cmdline = cmdline[:DEF_CMDLINE_LEN]
@@ -162,6 +169,13 @@ def main(argv):
             pid = color.set_color(pid, 'red')
         else:
             pid = str(pid)
+
+        # If the cmdline contains chinese, it should be decoded to utf8 before
+        # show in tabulate
+        try:
+            cmdline = cmdline.decode()
+        except:
+            cmdline = cmdline.decode('utf8')
         # Combine the list
         line = [ID, pid, name, cmdline, run_time_str, cpu, mem]
         table.append(line)

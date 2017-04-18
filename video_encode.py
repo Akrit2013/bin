@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Version: 0.7.1
+# Version: 0.8
 # This script encode the video using the x265/x264 encoder and merge the
 # encoded video with subtitles into a mkv file
 
@@ -13,6 +13,8 @@ import time_tools
 import ConfigParser
 import video_tools
 import common_tools
+import tabulate
+import color_lib
 
 
 def preprocess_str(in_str):
@@ -75,9 +77,13 @@ def interactive(rst_dict):
     This function use the interactive mode to get the param
     only if the param is None, the param will be set
     """
+    color = color_lib.color()
     if 'vencoder' not in rst_dict or rst_dict['vencoder'] is None:
-        log_tools.log_info('Select the \033[01;33mvideo encoder\033[0m:\
-\n0.copy\n1.\033[01;32mlibx265\033[0m\n2.libx264')
+        log_tools.log_info('Select the \033[01;33mvideo encoder\033[0m:')
+        tab = tabulate.tabulate([['0.copy',
+                                  color.set_color('1.libx265', 'green'),
+                                  '2.libx264']])
+        print(tab)
         ch = raw_input('input:')
         try:
             select = int(ch)
@@ -98,10 +104,13 @@ def interactive(rst_dict):
 
     if 'vpreset' not in rst_dict or rst_dict['vpreset'] is None:
         rst_dict['vpreset'] = 'veryslow'
-        log_tools.log_info('Select the video \033[01;33mencoding preset\033[0m:\
-\n1.ultrafast\n2.superfast\n\
-3.veryfast\n4.faster\n5.medium\n\033[01;32m6.slow\033[0m\n7.slower\n\
-8.veryslow\n9.placebo')
+        log_tools.log_info('Select the video \033[01;33mencoding \
+preset\033[0m:')
+        tab = tabulate.tabulate([['1.ultrafast', '2.superfast',
+                                  '3.veryfast', '4.faster', '5.medium',
+                                  color.set_color('6.slow', 'green'),
+                                  '7.slower', '8.veryslow', '9.placebo']])
+        print(tab)
         ch = raw_input('input:')
         try:
             select = int(ch)
@@ -159,8 +168,11 @@ def interactive(rst_dict):
 
     if ('vunit' not in rst_dict or rst_dict['vunit'] is None)\
             and rst_dict['vzoom'] != 1:
-        log_tools.log_info('Select the basic block \033[01;33munit\033[0m for resize:\n\
-\033[01;32m1.16x16\033[0m\n1.32x32')
+        log_tools.log_info('Select the basic block \033[01;33munit\033[0m \
+for resize:')
+        tab = tabulate.tabulate([[color.set_color('1.16x16', 'green'),
+                                  '2.32x32']])
+        print(tab)
         ch = raw_input('input:')
         try:
             select = int(ch)
@@ -180,8 +192,10 @@ def interactive(rst_dict):
         rst_dict['vunit'] = 16
 
     if 'aencoder' not in rst_dict or rst_dict['aencoder'] is None:
-        log_tools.log_info('Select the \033[01;33mAudio encoder\033[0m:\n\
-0.copy\n\033[01;32m1.libfdk_aac\033[0m')
+        log_tools.log_info('Select the \033[01;33mAudio encoder\033[0m:')
+        tab = tabulate.tabulate([['0.copy',
+                                  color.set_color('1.libfdk_aac', 'green')]])
+        print(tab)
         ch = raw_input('input:')
         try:
             select = int(ch)
@@ -200,8 +214,10 @@ def interactive(rst_dict):
 \033[01;31m%s\033[0m' % rst_dict['aencoder'])
 
     if 'abr' not in rst_dict or rst_dict['abr'] is None:
-        log_tools.log_info('Select the \033[01;33maudio bit rate\033[0m:\n\
-\033[01;32m1.384k\033[0m\n2.192k\n3.128k\n4.64k')
+        log_tools.log_info('Select the \033[01;33maudio bit rate\033[0m:')
+        tab = tabulate.tabulate([[color.set_color('1.384k', 'green'),
+                                  '2.192k', '3.128k', '4.64k']])
+        print(tab)
         ch = raw_input('input:')
         try:
             select = int(ch)
@@ -388,6 +404,7 @@ def main(argv):
     param_dict = {}
 
     has_subtitle = False
+    has_verbose = False
     is_interactive = False
 
     help_msg = 'video_encode -i <video> -o <video.mkv> -c [config] \
@@ -399,13 +416,14 @@ def main(argv):
 --s2 [subtitle] The second subtitle to be merged\n\
 --s3 [subtitle] The third subtitle to be merged\n\
 --s4 [subtitle] The forth subtitle to be merged\n\
--a              If set, use interactive mode to set the params'
+-a              If set, use interactive mode to set the params\n\
+-v              Enable the verbose output of ffmpeg.'
 
     try:
-        opts, args = getopt.getopt(argv, 'hi:o:c:a', ['s1=',
-                                                      's2=',
-                                                      's3=',
-                                                      's4='])
+        opts, args = getopt.getopt(argv, 'hi:o:c:av', ['s1=',
+                                                       's2=',
+                                                       's3=',
+                                                       's4='])
     except getopt.GetoptError:
         print help_msg
         sys.exit(2)
@@ -434,6 +452,8 @@ def main(argv):
         elif opt == '--s4':
             s4_file = preprocess_str(arg)
             has_subtitle = True
+        elif opt == '-v':
+            has_verbose = True
 
     if in_video is None or out_video is None:
         print help_msg
@@ -492,6 +512,9 @@ def main(argv):
             param_dict['vcrf'], param_dict['aencoder'],
             param_dict['abr'])
 
+    # Disable the verbose output of ffmpeg
+    if not has_verbose:
+        cmd_str_ffmpeg = cmd_str_ffmpeg + ' -v 1'
     # Search larger range to void the missing subtitles (optional)
     cmd_str_ffmpeg = cmd_str_ffmpeg + ' -analyzeduration 1000000k \
 -probesize 1000000k'
