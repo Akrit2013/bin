@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Version: 0.8
+# Version: 0.8.1
 # This script encode the video using the x265/x264 encoder and merge the
 # encoded video with subtitles into a mkv file
 
@@ -407,6 +407,8 @@ def main(argv):
     has_verbose = False
     is_interactive = False
 
+    color = color_lib.color(True)
+
     help_msg = 'video_encode -i <video> -o <video.mkv> -c [config] \
 --s1 [subtitle]\n\
 -i <video>      The input video to be encoded\n\
@@ -527,8 +529,14 @@ def main(argv):
     # Add the output
     cmd_str_ffmpeg = cmd_str_ffmpeg + ' ' + step1_file
 
-    # Begin to encode
-    log_tools.log_info('Start to encode the video %s' % in_video)
+    # Display the video length if can
+    len_str = video_tools.get_video_length_str(in_video)
+    if len_str is not None:
+        len_str = color.red(len_str)
+        log_tools.log_info('Start to encode %s / %s' % (len_str, in_video))
+    else:
+        log_tools.log_info('Start to encode %s' % in_video)
+
     # Display the cmd line
     log_tools.log_info('\033[0;33m%s\033[0m' % cmd_str_ffmpeg)
     # Start encode
