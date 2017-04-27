@@ -1,1 +1,1 @@
-/home/nile/project/caffe/tools/extra/plot_training_log.py.example
+/home/nile/project/caffe-dev-160608/tools/extra/plot_training_log.py.example

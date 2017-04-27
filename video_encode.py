@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Version: 0.8.1
+# Version: 0.8.2
 # This script encode the video using the x265/x264 encoder and merge the
 # encoded video with subtitles into a mkv file
 
@@ -406,6 +406,7 @@ def main(argv):
     has_subtitle = False
     has_verbose = False
     is_interactive = False
+    is_debug = False
 
     color = color_lib.color(True)
 
@@ -419,13 +420,15 @@ def main(argv):
 --s3 [subtitle] The third subtitle to be merged\n\
 --s4 [subtitle] The forth subtitle to be merged\n\
 -a              If set, use interactive mode to set the params\n\
--v              Enable the verbose output of ffmpeg.'
+-v              Enable the verbose output of ffmpeg\n\
+-d              Debug mode, if enable, the script only encode the \
+first video and first audio stream.'
 
     try:
-        opts, args = getopt.getopt(argv, 'hi:o:c:av', ['s1=',
-                                                       's2=',
-                                                       's3=',
-                                                       's4='])
+        opts, args = getopt.getopt(argv, 'hi:o:c:avd', ['s1=',
+                                                        's2=',
+                                                        's3=',
+                                                        's4='])
     except getopt.GetoptError:
         print help_msg
         sys.exit(2)
@@ -456,6 +459,8 @@ def main(argv):
             has_subtitle = True
         elif opt == '-v':
             has_verbose = True
+        elif opt == '-d':
+            is_debug = True
 
     if in_video is None or out_video is None:
         print help_msg
@@ -525,7 +530,11 @@ def main(argv):
     # Copy the subtitles
     cmd_str_ffmpeg = cmd_str_ffmpeg + ' -c:s copy'
     # Add map command to make sure all tracks are converted
-    cmd_str_ffmpeg = cmd_str_ffmpeg + ' -map 0'
+    if is_debug:
+        log_tools.log_warn('In debug mode, not all streams are encoded')
+    else:
+        cmd_str_ffmpeg = cmd_str_ffmpeg + ' -map 0'
+
     # Add the output
     cmd_str_ffmpeg = cmd_str_ffmpeg + ' ' + step1_file
 

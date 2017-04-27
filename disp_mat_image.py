@@ -38,7 +38,7 @@ def main(argv):
 
     im = matlab_tools.load_mat(in_file, var_name)
     ish = imshow_lib.Imshow()
-    ish.imshow(im)
+    ish.autoshow(im)
 
     raw_input('Press Enter to exist ...')
 

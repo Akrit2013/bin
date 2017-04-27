@@ -1,1 +1,1 @@
-/home/nile/project/caffe/tools/extra/parse_log.py
+/home/nile/project/caffe-dev-160608/tools/extra/parse_log.py
