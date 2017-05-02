@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Version: 0.8.2
+# Version: 0.9
 # This script encode the video using the x265/x264 encoder and merge the
 # encoded video with subtitles into a mkv file
 
@@ -440,21 +440,26 @@ first video and first audio stream.'
         elif opt == '-i':
             in_video = preprocess_str(arg)
         elif opt == '-o':
+            out_video_raw = arg
             out_video = preprocess_str(arg)
         elif opt == '-c':
             config_file = preprocess_str(arg)
         elif opt == '-a':
             is_interactive = True
         elif opt == '--s1':
+            s1_file_raw = arg
             s1_file = preprocess_str(arg)
             has_subtitle = True
         elif opt == '--s2':
+            s2_file_raw = arg
             s2_file = preprocess_str(arg)
             has_subtitle = True
         elif opt == '--s3':
+            s3_file_raw = arg
             s3_file = preprocess_str(arg)
             has_subtitle = True
         elif opt == '--s4':
+            s4_file_raw = arg
             s4_file = preprocess_str(arg)
             has_subtitle = True
         elif opt == '-v':
@@ -559,10 +564,10 @@ first video and first audio stream.'
 
     log_tools.log_info('Merge subtitles into MKV file')
     log_tools.log_info('Guessing the language of the subtitle')
-    lang1, track_name1 = get_language(s1_file)
-    lang2, track_name2 = get_language(s2_file)
-    lang3, track_name3 = get_language(s3_file)
-    lang4, track_name4 = get_language(s4_file)
+    lang1, track_name1 = get_language(s1_file_raw)
+    lang2, track_name2 = get_language(s2_file_raw)
+    lang3, track_name3 = get_language(s3_file_raw)
+    lang4, track_name4 = get_language(s4_file_raw)
 
     # Generate the subtitle list
     sub_list = []
@@ -617,13 +622,13 @@ first video and first audio stream.'
     log_tools.log_info('\033[0;33m%s\033[0m' % mkv_cmd_list)
     os.system(mkv_cmd_list)
     # Check the output video, and del the tmp file
-    if os.path.isfile(out_video):
+    if os.path.isfile(out_video_raw):
         os.remove(step1_file)
         log_tools.log_info('Finished. Output video \033[01;32m%s\033[0m'
-                           % out_video)
+                           % out_video_raw)
     else:
         log_tools.log_err('Can not find the output video \033[01;31m%s\033[0m'
-                          % out_video)
+                          % out_video_raw)
         log_tools.log_warn('Not delete the temporary \033[01;33m%s\033[0m'
                            % step1_file)
 
