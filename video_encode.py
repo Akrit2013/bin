@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Version: 0.9
+# Version: 0.9.1
 # This script encode the video using the x265/x264 encoder and merge the
 # encoded video with subtitles into a mkv file
 
@@ -398,9 +398,13 @@ def main(argv):
     in_video = None
     out_video = None
     s1_file = None
+    s1_file_raw = None
     s2_file = None
+    s2_file_raw = None
     s3_file = None
+    s3_file_raw = None
     s4_file = None
+    s4_file_raw = None
     param_dict = {}
 
     has_subtitle = False
