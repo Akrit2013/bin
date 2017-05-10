@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Version: 0.9.1
+# Version: 0.9.2
 # This script encode the video using the x265/x264 encoder and merge the
 # encoded video with subtitles into a mkv file
 
@@ -551,7 +551,8 @@ first video and first audio stream.'
     len_str = video_tools.get_video_length_str(in_video)
     if len_str is not None:
         len_str = color.red(len_str)
-        log_tools.log_info('Start to encode %s / %s' % (len_str, in_video))
+        in_video_color = color.yellow(in_video)
+        log_tools.log_info('Start to encode %s / %s' % (len_str, in_video_color))
     else:
         log_tools.log_info('Start to encode %s' % in_video)
 
