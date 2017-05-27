@@ -9,6 +9,8 @@ import log_tools
 import sys
 import imshow_lib
 import matlab_tools
+import pylab
+import numpy as np
 
 
 def main(argv):
@@ -16,14 +18,18 @@ def main(argv):
     var_name = None
 
     is_transpose = False
+    is_pcolor = False
+    is_log = False
 
     help_msg = 'disp_mat_image.py -i <mat> -v [var]\n\
 -i <mat>        The input mat file\n\
 -v [var]        The var name in the mat\n\
--t              Transpose the image before display'
+-t              Transpose the image before display\n\
+-p              Display in pcolor\n\
+-l              Convert to log space before display'
 
     try:
-        opts, args = getopt.getopt(argv, 'hi:v:t')
+        opts, args = getopt.getopt(argv, 'hi:v:ltp')
     except getopt.GetoptError:
         print help_msg
         sys.exit(2)
@@ -38,6 +44,10 @@ def main(argv):
             var_name = arg
         elif opt == '-t':
             is_transpose = True
+        elif opt == '-p':
+            is_pcolor = True
+        elif opt == '-l':
+            is_log = True
 
     if in_file is None:
         print help_msg
@@ -45,6 +55,12 @@ def main(argv):
 
     im = matlab_tools.load_mat(in_file, var_name)
     im = image_tools.preprocess(im)
+
+    # Conver to log space
+    if is_log:
+        im = np.log(im)
+        im = image_tools.repair_im(im)
+
     if is_transpose:
         if len(im.shape) == 2:
             im = im.transpose()
@@ -56,6 +72,8 @@ shape %s' % str(im.shape))
 
     ish = imshow_lib.Imshow()
     ish.autoshow(im)
+    if is_pcolor:
+        pylab.pcolor(im)
     raw_input('Press Enter to exist ...')
 
 
