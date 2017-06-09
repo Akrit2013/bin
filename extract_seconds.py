@@ -1,1 +1,1 @@
-/home/nile/project/caffe-dev-160608/tools/extra/extract_seconds.py
+/home/nile/project/caffe-stochastic-depth/tools/extra/extract_seconds.py

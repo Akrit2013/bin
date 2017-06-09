@@ -1,1 +1,1 @@
-/home/nile/project/caffe-dev-160608/tools/extra/parse_log.py
+/home/nile/project/caffe-stochastic-depth/tools/extra/parse_log.py

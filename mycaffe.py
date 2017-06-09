@@ -67,7 +67,9 @@ def parse_argv(lst):
     the current time, such as:
         solver_ex1.2_0301.0232.32
     """
-    if lst[0] != 'train':
+    # The train_stochdep is used in the stochastic deep CNN, which is not the
+    # standard caffe module
+    if lst[0] != 'train' and lst[0] != 'train_stochdep':
         return None
     # Find the solver name
     solver = None
