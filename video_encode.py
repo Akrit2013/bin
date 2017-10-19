@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Version: 0.9.2
+# Version: 1.0.0
 # This script encode the video using the x265/x264 encoder and merge the
 # encoded video with subtitles into a mkv file
 
@@ -394,6 +394,17 @@ default \033[01;32m%s\033[0m' % (MAIN_SEC, SUB_SEC, br))
     return rst_dict
 
 
+def notify(msg_title, msg_content):
+    """
+    Notify the mission complete
+    """
+    notify_cmd = "notify-send '%s' '%s'" % (msg_title, msg_content)
+    try:
+        os.system(notify_cmd)
+    except:
+        pass
+
+
 def main(argv):
     config_file = None
     in_video = None
@@ -566,6 +577,7 @@ first video and first audio stream.'
     if not has_subtitle:
         log_tools.log_info('The encode output: \033[0;32m%s\033[0m'
                            % step1_file)
+        notify('Encoding complete:', out_video)
         sys.exit()
 
     log_tools.log_info('Merge subtitles into MKV file')
@@ -632,11 +644,13 @@ first video and first audio stream.'
         os.remove(step1_file)
         log_tools.log_info('Finished. Output video \033[01;32m%s\033[0m'
                            % out_video_raw)
+        notify('Encoding complete: ', out_video)
     else:
         log_tools.log_err('Can not find the output video \033[01;31m%s\033[0m'
                           % out_video_raw)
         log_tools.log_warn('Not delete the temporary \033[01;33m%s\033[0m'
                            % step1_file)
+        notify('Encoding error: ', out_video)
 
 
 if __name__ == '__main__':

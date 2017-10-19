@@ -1,1 +1,1 @@
-/home/nile/project/caffe-stochastic-depth/tools/extra/plot_training_log.py.example
+/home/nile/project/caffe/tools/extra/plot_training_log.py.example

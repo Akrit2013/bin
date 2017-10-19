@@ -1,1 +1,1 @@
-/home/nile/project/caffe-stochastic-depth/tools/extra/summarize.py
+/home/nile/project/caffe/tools/extra/summarize.py
