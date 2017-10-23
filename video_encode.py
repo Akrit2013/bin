@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Version: 1.0.0
+# Version: 1.1.0
 # This script encode the video using the x265/x264 encoder and merge the
 # encoded video with subtitles into a mkv file
 
@@ -73,7 +73,7 @@ def find_best_resolution(src_width, src_height, zoom, unit,
     return [target_width, target_height, lowest_err]
 
 
-def interactive(rst_dict):
+def interactive(rst_dict, num_audio_track):
     """
     This function use the interactive mode to get the param
     only if the param is None, the param will be set
@@ -238,6 +238,32 @@ for resize:')
 
         log_tools.log_info('Use audio bitrate \033[01;31m%s\033[0m'
                            % rst_dict['abr'])
+
+    if num_audio_track > 1 and 'abr_aux' not in rst_dict or rst_dict['abr_aux'] is None:
+        log_tools.log_info('Select the \033[01;33maux audio bit rate\033[0m:')
+        tab = tabulate.tabulate([['1.384k', '2.192k', '3.128k',
+                                  color.set_color('4.64k', 'green')]])
+        print(tab)
+        ch = raw_input('input:')
+        try:
+            select = int(ch)
+        except:
+            select = -1
+
+        if select == 1:
+            rst_dict['abr_aux'] = '384k'
+        elif select == 2:
+            rst_dict['abr_aux'] = '192k'
+        elif select == 3:
+            rst_dict['abr_aux'] = '128k'
+        elif select == 4:
+            rst_dict['abr_aux'] = '64k'
+        else:
+            rst_dict['abr_aux'] = '64k'
+
+        log_tools.log_info('Use aux audio bitrate \033[01;31m%s\033[0m'
+                           % rst_dict['abr_aux'])
+
     return rst_dict
 
 
@@ -309,6 +335,11 @@ def default_setting(rst_dict):
         rst_dict['abr'] = '384k'
         log_tools.log_info('Use default audio bitrate \033[01;31m%s\033[0m'
                            % rst_dict['abr'])
+
+    if 'abr_aux' not in rst_dict or rst_dict['abr_aux'] is None:
+        rst_dict['abr_aux'] = '64k'
+        log_tools.log_info('Use default aux audio bitrate \033[01;31m%s\033[0m'
+                           % rst_dict['abr_aux'])
     return rst_dict
 
 
@@ -383,6 +414,15 @@ default \033[01;32m%s\033[0m' % (MAIN_SEC, SUB_SEC, aencoder))
         log_tools.log_warn('Can not find %s %s, use \
 default \033[01;32m%s\033[0m' % (MAIN_SEC, SUB_SEC, br))
 
+    SUB_SEC = 'br_aux'
+    try:
+        br_aux = config.get(MAIN_SEC, SUB_SEC)
+        log_tools.log_info('Aux audio bitrate: \033[01;32m%s\033[0m' % br_aux)
+    except:
+        br_aux = None
+        log_tools.log_warn('Can not find %s %s, use \
+default \033[01;32m%s\033[0m' % (MAIN_SEC, SUB_SEC, br_aux))
+
     rst_dict = {}
     rst_dict['vencoder'] = vencoder
     rst_dict['vpreset'] = vpreset
@@ -391,6 +431,7 @@ default \033[01;32m%s\033[0m' % (MAIN_SEC, SUB_SEC, br))
     rst_dict['vunit'] = unit
     rst_dict['aencoder'] = aencoder
     rst_dict['abr'] = br
+    rst_dict['abr_aux'] = br_aux
     return rst_dict
 
 
@@ -423,6 +464,7 @@ def main(argv):
     has_verbose = False
     is_interactive = False
     is_debug = False
+    is_enc_audio_aux_64k = False
 
     color = color_lib.color(True)
 
@@ -436,6 +478,8 @@ def main(argv):
 --s3 [subtitle] The third subtitle to be merged\n\
 --s4 [subtitle] The forth subtitle to be merged\n\
 -a              If set, use interactive mode to set the params\n\
+--aux           If the video have the aux audio track, set this will \
+encode the second audio with 64kb\n\
 -v              Enable the verbose output of ffmpeg\n\
 -d              Debug mode, if enable, the script only encode the \
 first video and first audio stream.'
@@ -444,7 +488,8 @@ first video and first audio stream.'
         opts, args = getopt.getopt(argv, 'hi:o:c:avd', ['s1=',
                                                         's2=',
                                                         's3=',
-                                                        's4='])
+                                                        's4=',
+                                                        'aux'])
     except getopt.GetoptError:
         print help_msg
         sys.exit(2)
@@ -482,6 +527,8 @@ first video and first audio stream.'
             has_verbose = True
         elif opt == '-d':
             is_debug = True
+        elif opt == '--aux':
+            is_enc_audio_aux_64k = True
 
     if in_video is None or out_video is None:
         print help_msg
@@ -495,7 +542,8 @@ first video and first audio stream.'
         step1_file = out_video
 
     # Display the video basic info
-    video_tools.print_video_basic_info(in_video)
+    info = video_tools.print_video_basic_info(in_video)
+    num_audio_track = len(info['audio'])
 
     # Load the config file
     if config_file is None:
@@ -505,7 +553,7 @@ first video and first audio stream.'
 
     if is_interactive:
         # Use interactive mode to set the param
-        param_dict = interactive(param_dict)
+        param_dict = interactive(param_dict, num_audio_track)
     else:
         # Set the default param
         param_dict = default_setting(param_dict)
@@ -539,6 +587,11 @@ first video and first audio stream.'
 -b:a %s' % (in_video, param_dict['vencoder'], param_dict['vpreset'],
             param_dict['vcrf'], param_dict['aencoder'],
             param_dict['abr'])
+
+    # Set the encode mode for the audio track 1
+    if is_enc_audio_aux_64k and num_audio_track > 1:
+        cmd_str_ffmpeg = cmd_str_ffmpeg + ' -c:a:1 %s \
+-b:a:1 %s' % (param_dict['aencoder'], param_dict['abr_aux'])
 
     # Disable the verbose output of ffmpeg
     if not has_verbose:
