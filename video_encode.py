@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Version: 1.1.0
+# Version: 1.1.1
 # This script encode the video using the x265/x264 encoder and merge the
 # encoded video with subtitles into a mkv file
 
@@ -239,7 +239,7 @@ for resize:')
         log_tools.log_info('Use audio bitrate \033[01;31m%s\033[0m'
                            % rst_dict['abr'])
 
-    if num_audio_track > 1 and 'abr_aux' not in rst_dict or rst_dict['abr_aux'] is None:
+    if num_audio_track > 1 and ('abr_aux' not in rst_dict or rst_dict['abr_aux'] is None):
         log_tools.log_info('Select the \033[01;33maux audio bit rate\033[0m:')
         tab = tabulate.tabulate([['1.384k', '2.192k', '3.128k',
                                   color.set_color('4.64k', 'green')]])
